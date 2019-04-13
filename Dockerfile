@@ -7,6 +7,7 @@ RUN apk update \
 
 COPY startup-root.sh /root/startup-root.sh
 COPY backup.pl /root/backup.pl
+COPY crontab /etc/crontabs/root
 
 RUN sh -n /root/startup-root.sh
 RUN perl -c /root/backup.pl
@@ -15,7 +16,6 @@ RUN mkdir -p /backup/monthly \
     ; mkdir -p /backup/weekly \
     ; mkdir -p /backup/out
 
-COPY crontab /etc/crontabs/root
 
 ENTRYPOINT ["sh", "/root/startup-root.sh"]
 

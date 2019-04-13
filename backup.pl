@@ -22,10 +22,12 @@ use constant {
 
 my $root_dir;
 my $out_dir;
+my $dry_run = 0;
 
 GetOptions (
     "rootdir=s" => \$root_dir,
-    "outdir=s"  => \$out_dir
+    "outdir=s"  => \$out_dir,
+    "dryrun"    => \$dry_run
 ) or die ("Error in command line arguments\n");
 
 unless( defined($root_dir) && defined($root_dir))
@@ -40,6 +42,11 @@ unless ( -e $root_dir && -d $root_dir )
 unless ( -e $out_dir && -d $out_dir )
 {
     die "ERROR: out directory \"$out_dir\" is not valid";
+}
+
+if($dry_run == 1)
+{
+    print "$root_dir\n";
 }
 
 my $success = 1;
@@ -57,14 +64,23 @@ if($success == 1)
     }
 }
 
+if($dry_run == 1)
+{
+    foreach my $file (@file_list)
+    {
+        print "\t$file\n";
+    }
+}
+
 my @archive_list;
-if($success == 1)
+if($success == 1 && $dry_run != 1)
 {
     # Archive creation is best-effort. If one fails, keep trying the others.
     foreach my $sub_dir (@file_list)
     {
         my $archive_path;
         my $local_success = CreateArchive(\$archive_path, $root_dir, $sub_dir, $out_dir, $compression);
+
         if($local_success == 1)
         {
             push(@archive_list, $archive_path);
