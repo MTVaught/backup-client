@@ -206,5 +206,20 @@ sub CreateArchive
         $$archive_path = $tar_dest;
     }
 
+    if($success == 1)
+    {
+        # TODO: change uid of file
+    }
+
+    if($success == 1)
+    {
+        # TODO: change gid of file
+    }
+
+    if($success == 1)
+    {
+        # TODO: change permissions of file
+    }
+
     return $success;
 }
