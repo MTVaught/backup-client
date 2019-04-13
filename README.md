@@ -2,11 +2,10 @@
 
 # ENV variables
 
-(currently none)
 
-USE_ENCRYPTION=<0|1>
+USE_COMPRESSION=<0|1> (unimplemented)
 
-USE_VERBOSE=<0|1>
+USE_ENCRYPTION=<0|1> (unimplemented)
 
 # BIND mounts:
 backup sources are located in:

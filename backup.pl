@@ -13,9 +13,9 @@ use Getopt::Long;
 use constant {
     TAR                     => "tar",
     TAR_FLAGS               => "cf",
-    TAR_FLAGS_ENCRYPT       => "czf",
+    TAR_FLAGS_COMPRESS       => "czf",
     TAR_EXTENSION           => "tar",
-    TAR_EXTENSION_ENCRYPT   => "tar.gz",
+    TAR_EXTENSION_COMPRESS   => "tar.gz",
     WEEKLY                  => "weekly",
     MONTHLY                 => "monthly",
 };
@@ -45,7 +45,7 @@ unless ( -e $out_dir && -d $out_dir )
 my $success = 1;
 
 # TODO: pull this from an ENV variable (and sanitize)
-my $encryption = 0;
+my $compression = 0;
 
 my @file_list;
 if($success == 1)
@@ -64,7 +64,7 @@ if($success == 1)
     foreach my $sub_dir (@file_list)
     {
         my $archive_path;
-        my $local_success = CreateArchive(\$archive_path, $root_dir, $sub_dir, $out_dir, $encryption);
+        my $local_success = CreateArchive(\$archive_path, $root_dir, $sub_dir, $out_dir, $compression);
         if($local_success == 1)
         {
             push(@archive_list, $archive_path);
@@ -132,7 +132,7 @@ sub GetFilesInDirectory
 
 sub CreateArchive
 {
-    my ($archive_path, $root_dir, $sub_dir, $out_dir, $encryption) = @_;
+    my ($archive_path, $root_dir, $sub_dir, $out_dir, $compression) = @_;
     my $success = 1;
 
 
@@ -176,10 +176,10 @@ sub CreateArchive
     {
         my $timestamp = strftime "%Y-%m-%d_%H-%M-GMT", gmtime time;
 
-        if($encryption == 1)
+        if($compression == 1)
         {
-            $tar_cmd = TAR . ' ' . TAR_FLAGS_ENCRYPT;
-            $tar_dest = "$dest_dir/$sub_dir-$timestamp." . TAR_EXTENSION_ENCRYPT;
+            $tar_cmd = TAR . ' ' . TAR_FLAGS_COMPRESS;
+            $tar_dest = "$dest_dir/$sub_dir-$timestamp." . TAR_EXTENSION_COMPRESS;
         }
         else
         {
