@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker pull centos:centos7
+docker pull alpine:latest
 docker build --rm --tag=backup-client .

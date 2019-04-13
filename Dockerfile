@@ -1,8 +1,7 @@
-FROM centos:centos7
+FROM alpine:latest
 
-RUN yum install -y \
-    vim-minimal \
-    crontabs \
+RUN apk update \
+    && apk add \
     tar \
     perl
 
@@ -14,7 +13,11 @@ RUN perl -c /root/backup.pl
 
 RUN mkdir -p /backup/monthly \
     ; mkdir -p /backup/weekly \
-    ; mkdir -p /backup/out \
-    ; crontab /root/crontab
+    ; mkdir -p /backup/out
+#    ; crontab /root/crontab
 
-CMD ["bash", "/root/startup-root.sh"]
+COPY crontab /etc/crontabs/root
+
+ENTRYPOINT ["sh", "/root/startup-root.sh"]
+
+CMD ["crond", "-f", "-d", "8", "> /proc/1/fd/1", "2> /proc/1/fd/2"]
