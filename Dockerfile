@@ -10,6 +10,8 @@ COPY startup-root.sh /root/startup-root.sh
 COPY backup.pl /root/backup.pl
 COPY crontab /root/crontab
 
+RUN perl -c /root/backup.pl
+
 RUN mkdir -p /backup/monthly \
     ; mkdir -p /backup/weekly \
     ; mkdir -p /backup/out \
