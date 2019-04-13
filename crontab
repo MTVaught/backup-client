@@ -1,4 +1,4 @@
 # Test
 
-0 0 * * 0 /root/backup.sh --freq=weekly --rootdir=/backup/weekly --outdir=/backup/out/weekly
-0 0 1 * * /root/backup.sh --freq=monthly --rootdir=/backup/monthly --outdir=/backup/out/monthly
+0 0 * * 0 /root/backup.sh --rootdir=/backup/weekly --outdir=/backup/out/weekly
+0 0 1 * * /root/backup.sh --rootdir=/backup/monthly --outdir=/backup/out/monthly

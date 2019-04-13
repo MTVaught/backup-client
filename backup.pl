@@ -6,7 +6,6 @@ use warnings;
 use POSIX;
 use Getopt::Long;
 # args
-#   --freq=<weekly/monthly>
 #   --rootdir=<src>
 #   --outdir=<dest>
 
@@ -21,25 +20,19 @@ use constant {
     MONTHLY                 => "monthly",
 };
 
-my $frequency;
 my $root_dir;
 my $out_dir;
 
 GetOptions (
-    "freq=s"    => \$frequency,
     "rootdir=s" => \$root_dir,
     "outdir=s"  => \$out_dir
 ) or die ("Error in command line arguments\n");
 
-unless( defined($frequency) && defined($root_dir) && defined($root_dir))
+unless( defined($root_dir) && defined($root_dir))
 {
     die "ERROR: Not all options are defined\n";
 }
 
-if($frequency ne WEEKLY && $frequency ne MONTHLY)
-{
-    die "ERROR: Invalid frequency selection: \"$frequency\"";
-}
 unless ( -e $root_dir && -d $root_dir )
 {
     die "ERROR: root directory \"$root_dir\" is not valid";
