@@ -156,6 +156,20 @@ sub CreateArchive
         }
     }
 
+    my $dest_dir;
+    if( $success == 1)
+    {
+        $dest_dir = "$out_dir/$sub_dir";
+        my $mkdir_cmd = "mkdir -p $dest_dir";
+        system($mkdir_cmd);
+
+        unless ( -e $dest_dir && -d $dest_dir )
+        {
+            print "ERROR: output directory \"$dest_dir\" does not exist\n";
+            $success = 0;
+        }
+    }
+
     my $tar_cmd;
     my $tar_dest;
     if($success == 1)
@@ -165,12 +179,12 @@ sub CreateArchive
         if($encryption == 1)
         {
             $tar_cmd = TAR . ' ' . TAR_FLAGS_ENCRYPT;
-            $tar_dest = "$out_dir/$sub_dir-$timestamp." . TAR_EXTENSION_ENCRYPT;
+            $tar_dest = "$dest_dir/$sub_dir-$timestamp." . TAR_EXTENSION_ENCRYPT;
         }
         else
         {
             $tar_cmd = TAR . ' ' . TAR_FLAGS;
-            $tar_dest = "$out_dir/$sub_dir-$timestamp." . TAR_EXTENSION;
+            $tar_dest = "$dest_dir/$sub_dir-$timestamp." . TAR_EXTENSION;
         }
     }
 
