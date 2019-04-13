@@ -47,18 +47,35 @@ my $success = 1;
 # TODO: pull this from an ENV variable (and sanitize)
 my $encryption = 0;
 
-my $sub_dir = "tmp";
-my $archive_path;
-$success = CreateArchive(\$archive_path, $root_dir, $sub_dir, $out_dir, $encryption);
-print "success = $success\n";
-
-
 my @file_list;
-GetFilesInDirectory(\@file_list, $ENV{'PWD'}."/test/weekly");
-
-foreach my $file (@file_list)
+if($success == 1)
 {
-    print $file . "\n";
+    $success = GetFilesInDirectory(\@file_list, $root_dir);
+    unless($success == 1)
+    {
+        print "ERROR: Directory parse failed\n";
+    }
+}
+
+my @archive_list;
+if($success == 1)
+{
+    # Archive creation is best-effort. If one fails, keep trying the others.
+    foreach my $sub_dir (@file_list)
+    {
+        my $archive_path;
+        my $local_success = CreateArchive(\$archive_path, $root_dir, $sub_dir, $out_dir, $encryption);
+        if($local_success == 1)
+        {
+            push(@archive_list, $archive_path);
+            print "Created Archive: \"$archive_path\"\n";
+        }
+        else
+        {
+            $success = 0;
+            print "ERROR: failed to archive \"$root_dir/$sub_dir\"\n";
+        }
+    }
 }
 
 if($success == 1)
@@ -183,5 +200,11 @@ sub CreateArchive
             print "ERROR: tar command failed:\n$output\n";
         }
     }
+
+    if($success == 1)
+    {
+        $$archive_path = $tar_dest;
+    }
+
     return $success;
 }
