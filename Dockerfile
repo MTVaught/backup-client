@@ -3,7 +3,8 @@ FROM alpine:latest
 RUN apk update \
     && apk add \
         tar \
-        perl
+        perl \
+        gnupg
 
 COPY startup-root.sh /root/startup-root.sh
 COPY backup.pl /root/backup.pl

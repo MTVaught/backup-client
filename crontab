@@ -1,6 +1,6 @@
 # Weekly/Monthly executions
-0 0 * * 0 perl /root/backup.pl --rootdir=/backup/weekly --outdir=/backup/out/weekly
-0 0 1 * * perl /root/backup.pl --rootdir=/backup/monthly --outdir=/backup/out/monthly
+0 0 * * 0 perl /root/backup.pl --rootdir=/backup/weekly --outdir=/backup/out/weekly --gpgoutdir=/backup/gpg/weekly --gpg_passphrase=\'$GPG_KEY\'
+0 0 1 * * perl /root/backup.pl --rootdir=/backup/monthly --outdir=/backup/out/monthly --gpgoutdir=/backup/gpg/monthly --gpg_passphrase=\'$GPG_KEY\'
 
 # Testing (every 5 minutes)
-#*/5 * * * * perl /root/backup.pl --rootdir=/backup/weekly --outdir=/backup/out/weekly
+#*/5 * * * * perl /root/backup.pl --rootdir=/backup/weekly --outdir=/backup/out/weekly --gpgoutdir=/backup/gpg/weekly --gpg_passphrase=\'$GPG_KEY\'

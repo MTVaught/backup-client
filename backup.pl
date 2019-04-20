@@ -18,19 +18,29 @@ use constant {
     TAR_EXTENSION_COMPRESS   => "tar.gz",
     WEEKLY                  => "weekly",
     MONTHLY                 => "monthly",
+    GPG                     => "gpg",
+    GPG_ENCRYPT             => "--symmetric",
+    GPG_BATCH               => "--batch",
+    GPG_PASSPHRASE          => "--passphrase",
+    GPG_OUT                 => "-o",
+    GPG_EXTENSION           => "gpg",
 };
 
 my $root_dir;
 my $out_dir;
 my $dry_run = 0;
+my $gpg_passphrase;
+my $gpg_out_dir;
 
 GetOptions (
     "rootdir=s" => \$root_dir,
     "outdir=s"  => \$out_dir,
-    "dryrun"    => \$dry_run
+    "dryrun"    => \$dry_run,
+    "gpgoutdir=s"    => \$gpg_out_dir,
+    "gpg_passphrase=s"    => \$gpg_passphrase
 ) or die ("Error in command line arguments\n");
 
-unless( defined($root_dir) && defined($root_dir))
+unless( defined($root_dir) && defined($out_dir))
 {
     die "ERROR: Not all options are defined\n";
 }
@@ -42,6 +52,22 @@ unless ( -e $root_dir && -d $root_dir )
 unless ( -e $out_dir && -d $out_dir )
 {
     die "ERROR: out directory \"$out_dir\" is not valid";
+}
+if (defined($gpg_passphrase))
+{
+    if ($gpg_passphrase eq "")
+    {
+        die "ERROR: empty gpg passphrase specified\n";
+    }
+    unless (defined($gpg_out_dir))
+    {
+        die "ERROR: undefined value for gpgoutdir";
+    }
+    unless ( -e $gpg_out_dir && -d $gpg_out_dir )
+    {
+        die "ERROR: gpg out directory \"$gpg_out_dir\" is not valid";
+    }
+    print $gpg_passphrase . "\n";
 }
 
 if($dry_run == 1)
@@ -83,6 +109,9 @@ if($success == 1 && $dry_run != 1)
 
         if($local_success == 1)
         {
+            my $encrypted_path;
+            $success = EncryptFile(\$encrypted_path, $archive_path, $root_dir, $sub_dir, $gpg_out_dir, $gpg_passphrase);
+            
             push(@archive_list, $archive_path);
             print "Created Archive: \"$archive_path\"\n";
         }
@@ -220,9 +249,8 @@ sub CreateArchive
         
         my $run_cmd = "$run_cd_cmd && $run_tar_cmd";
         print $run_cmd . "\n";
-        my $output = `$run_cmd`;
 
-        system($run_cmd);
+        my $output = `$run_cmd`;
 
         unless ($? == 0)
         {
@@ -253,3 +281,96 @@ sub CreateArchive
 
     return $success;
 }
+
+sub EncryptFile
+{
+    my ($encrypted_path, $src_file, $root_dir, $sub_dir, $out_dir, $gpg_passphrase) = @_;
+    my $success = 1;
+
+
+    unless ( -e $out_dir && -d $out_dir )
+    {
+        print "ERROR: output directory \"$out_dir\" does not exist\n";
+        $success = 0;
+    }
+    unless ( -e $src_file )
+    {
+        print "ERROR: source file \"$src_file\" does not exist\n";
+        $success = 0;
+    }
+
+    my $dest_dir;
+    if( $success == 1)
+    {
+        $dest_dir = "$out_dir/$sub_dir";
+        my $mkdir_cmd = "mkdir -p $dest_dir";
+        system($mkdir_cmd);
+
+        unless ( -e $dest_dir && -d $dest_dir )
+        {
+            print "ERROR: output directory \"$dest_dir\" does not exist\n";
+            $success = 0;
+        }
+    }
+
+    my $gpg_cmd;
+    my $gpg_dest;
+    if($success == 1)
+    {
+        $src_file =~ m/[^\/]+$/;
+        my $file_name = $&;
+        $gpg_cmd = GPG 
+                    . ' ' . GPG_BATCH
+                    .' '. GPG_PASSPHRASE .' '. $gpg_passphrase
+                    ;
+        $gpg_dest = "$dest_dir/$file_name." . GPG_EXTENSION;
+    }
+
+    if($success == 1)
+    {
+        if ( -e $gpg_dest )
+        {
+            print "ERROR: destination archive \"$gpg_dest\" already exists\n";
+            $success = 0;
+        }
+    }
+
+    if($success == 1)
+    {
+        my $run_gpg_cmd = "$gpg_cmd " . GPG_OUT . " $gpg_dest"
+                              .' '. GPG_ENCRYPT . " $src_file";
+        
+        print $run_gpg_cmd . "\n";
+
+        my $output = `$run_gpg_cmd`;
+
+        unless ($? == 0)
+        {
+            $success = 0;
+            print "ERROR: gpg command failed:\n$output\n";
+        }
+    }
+
+    if($success == 1)
+    {
+        $$encrypted_path = $gpg_dest;
+    }
+
+    if($success == 1)
+    {
+        # TODO: change uid of file
+    }
+
+    if($success == 1)
+    {
+        # TODO: change gid of file
+    }
+
+    if($success == 1)
+    {
+        # TODO: change permissions of file
+    }
+
+    return $success;
+}
+
