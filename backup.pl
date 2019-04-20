@@ -67,7 +67,6 @@ if (defined($gpg_passphrase))
     {
         die "ERROR: gpg out directory \"$gpg_out_dir\" is not valid";
     }
-    print $gpg_passphrase . "\n";
 }
 
 if($dry_run == 1)
@@ -339,8 +338,6 @@ sub EncryptFile
     {
         my $run_gpg_cmd = "$gpg_cmd " . GPG_OUT . " $gpg_dest"
                               .' '. GPG_ENCRYPT . " $src_file";
-        
-        print $run_gpg_cmd . "\n";
 
         my $output = `$run_gpg_cmd`;
 
