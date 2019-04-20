@@ -12,8 +12,8 @@ use Getopt::Long;
 ## Constants
 use constant {
     TAR                     => "tar",
-    TAR_FLAGS               => "cf",
-    TAR_FLAGS_COMPRESS       => "czf",
+    TAR_FLAGS               => "cWf",
+    TAR_FLAGS_COMPRESS       => "czWf",
     TAR_EXTENSION           => "tar",
     TAR_EXTENSION_COMPRESS   => "tar.gz",
     WEEKLY                  => "weekly",
@@ -250,6 +250,7 @@ sub CreateArchive
         print $run_cmd . "\n";
 
         my $output = `$run_cmd`;
+        print "$output\n";
 
         unless ($? == 0)
         {
