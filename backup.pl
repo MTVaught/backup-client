@@ -108,8 +108,11 @@ if($success == 1 && $dry_run != 1)
 
         if($local_success == 1)
         {
-            my $encrypted_path;
-            $success = EncryptFile(\$encrypted_path, $archive_path, $root_dir, $sub_dir, $gpg_out_dir, $gpg_passphrase);
+            if(defined($gpg_passphrase))
+            {
+                my $encrypted_path;
+                $success = EncryptFile(\$encrypted_path, $archive_path, $root_dir, $sub_dir, $gpg_out_dir, $gpg_passphrase);
+            }
             
             push(@archive_list, $archive_path);
             print "Created Archive: \"$archive_path\"\n";
