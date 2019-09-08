@@ -1,14 +1,12 @@
 #!/bin/bash
 
-mkdir -p test/monthly
-mkdir -p test/weekly
-mkdir -p test/backup
+mkdir -p test/in
+mkdir -p test/out
 
 docker run --rm \
-    --mount src=$PWD/test/monthly,target=/backup/monthly,type=bind,readonly \
-    --mount src=$PWD/test/weekly,target=/backup/weekly,type=bind,readonly \
-    --mount src=$PWD/test/backup,target=/backup/out,type=bind \
-    --mount src=$PWD/test/gpg,target=/backup/gpg,type=bind \
-    -e GPG_KEY='!@#$%^&*()testkey' \
+    -v $PWD/test/in:/backup/in:Z \
+    -v $PWD/test/out:/backup/out:Z \
+    --env APP_UID=`id -u` \
+    --env APP_GID=`id -g` \
+    --env APP_CRON='* * * * *' \
    backup-client &
-

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker pull alpine:latest
+docker pull mtvaught/cron-base:latest
 docker build --rm --tag=backup-client .
