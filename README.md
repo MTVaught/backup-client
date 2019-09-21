@@ -1,26 +1,25 @@
 # backup-client
 
+A docker container that will automatically generate tar files from directories.
+
 # ENV variables
+See https://github.com/MTVaught/docker-cron-base for ENV variables
 
+# Directory mounts
 
-USE_COMPRESSION=<0|1> (unimplemented)
+    /backup/config (ro)
+    /backup/in (ro)
+    /backup/out (rw)
 
-USE_ENCRYPTION=<0|1> (unimplemented)
+# /backup/config
+Optional. Required to enable automatic cleanup of tars.
+In order to enable, must contain config.ini with:
 
-# BIND mounts:
-backup sources are located in:
+    [CLEANUP]
+    days = <number>
 
-    /backup/monthly
-    /backup/weekly
+# /backup/in
+Any file/directory in this directory will have a tar created for it.
 
-backup outputs are in
-
-    /backup/out/monthly
-    /backup/out/weekly
-
-If I wanted to back up "/home/user/importantfiles":
-
-    bind (readonly) /home/user/importantfiles -> /backup/weekly/importantfiles
-    or
-    bind (readonly) /home/user/importantfiles -> /backup/monthly/importantfiles
-
+# /backup/out
+The tars created will be placed in here.
