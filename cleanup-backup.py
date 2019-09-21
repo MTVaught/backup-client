@@ -2,6 +2,7 @@ import os
 import time
 import sys
 import getopt
+import configparser
 # backup directory
 # Number of days old
 # dryrun option
@@ -56,18 +57,26 @@ def cleanDirectory ( dir_path, nDays ):
 
 # MAIN
 # argv[0] = path to backup folder
-# argv[1] = number of days
+# argv[1] = path to config file
 
 if len(sys.argv) != 3:
     print ("ERROR: only two arguments are allowed")
     exit(-1)
 
 dir_path = sys.argv[1]
-nDaysCutoff = sys.argv[2]
+config_path = sys.argv[2]
 
 if not os.path.exists(dir_path):
     print ("ERROR: directory path \"" + dir_path + "\" does not exist")
     exit(-1)
+
+if not os.path.isfile(config_path):
+    print ("ERROR: config file \"" + config_path + "\" does not exist")
+    exit(-1)
+
+config = configparser.ConfigParser()
+config.read(config_path)
+nDaysCutoff = config['CLEANUP']['days']
 
 try:
     nDaysCutoff = int(nDaysCutoff)
@@ -75,8 +84,8 @@ except ValueError:
     print ("ERROR: cutoff must be an integer (number of days)")
     exit(-1)
 
-print(dir_path)
-print(nDaysCutoff)
+print("Running cleanup script in \"" + dir_path + "\"")
+print("Cleaning up files older than " + str(nDaysCutoff)  + " days")
 
 filesInDir = os.listdir(dir_path)
 
