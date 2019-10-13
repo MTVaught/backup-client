@@ -9,11 +9,11 @@ RUN apk update \
     && pip install \
         configparser
 
-COPY startup-root.sh /root/staging/startup.sh
-COPY backup.pl /root/staging/backup.pl
-COPY run-backup.sh /root/staging/run.sh
-COPY run-dry.sh /root/staging/run-dry.sh
-COPY cleanup-backup.py /root/staging/cleanup-backup.py
+COPY container-scripts/startup.sh     /root/staging/startup.sh
+COPY container-scripts/run-backup.sh  /root/staging/run.sh
+COPY container-scripts/run-dry.sh     /root/staging/run-dry.sh
+COPY backup-scripts/backup.pl         /root/staging/backup.pl
+COPY backup-scripts/cleanup-backup.py /root/staging/cleanup-backup.py
 
 RUN chmod +x /root/staging/startup.sh
 RUN chmod +x /root/staging/run.sh
