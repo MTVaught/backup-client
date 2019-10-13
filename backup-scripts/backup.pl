@@ -251,7 +251,7 @@ sub CreateArchive
     if( $success == 1)
     {
         $dest_dir = "$out_dir/$archive_name";
-        my $mkdir_cmd = "mkdir -p $dest_dir";
+        my $mkdir_cmd = "mkdir -p \"$dest_dir\"";
         system($mkdir_cmd);
 
         unless ( IsDir($dest_dir) )
@@ -290,8 +290,8 @@ sub CreateArchive
 
     if($success == 1)
     {
-        my $run_cd_cmd = "cd $in_dir";
-        my $run_tar_cmd = "$tar_cmd $tar_dest $in_file";
+        my $run_cd_cmd = "cd \"$in_dir\"";
+        my $run_tar_cmd = "$tar_cmd \"$tar_dest\" \"$in_file\"";
         
         my $run_cmd = "$run_cd_cmd && $run_tar_cmd";
         print $run_cmd . "\n";

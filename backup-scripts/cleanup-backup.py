@@ -17,40 +17,39 @@ import configparser
 
 # Function definition
 def cleanDirectory ( dir_path, exclude_output_path, nDays ):
-    print ("Searching " + dir_path + " for files older than " + str(nDays) + " days")
-
-    # calculate what time (in seconds) to use as a cutoff for moving files
-    timeOffset = nDays * 24 * 60 * 60
-    timeCurrent = time.time()
-    timeCutoff = timeCurrent - timeOffset
-
-    #print(str(timeOffset))
-    #print(str(timeCurrent))
-    #print(str(timeCutoff))
 
     # Make sure that the file to list exists
     if os.path.exists(dir_path):
-        #print ("good path")
-        filesInDir = os.listdir(dir_path)
+        if not os.listdir(dir_path):
+            print ("Removing empty directory " + dir_path + "\n")
+            os.rmdir(dir_path)
+        else:
+            # calculate what time (in seconds) to use as a cutoff for moving files
+            timeOffset = nDays * 24 * 60 * 60
+            timeCurrent = time.time()
+            timeCutoff = timeCurrent - timeOffset
+            print ("Searching " + dir_path + " for files older than " + str(nDays) + " days")
+            #print ("good path")
+            filesInDir = os.listdir(dir_path)
 
-        filesOlderThanCutoff = []
-        for file in filesInDir:
-            fileModTime = os.path.getmtime(os.path.join(dir_path,file))
-            if fileModTime < timeCutoff:
-                filesOlderThanCutoff.append(file)
+            filesOlderThanCutoff = []
+            for file in filesInDir:
+                fileModTime = os.path.getmtime(os.path.join(dir_path,file))
+                if fileModTime < timeCutoff:
+                    filesOlderThanCutoff.append(file)
 
-        #print(filesOlderThanCutoff)
+            #print(filesOlderThanCutoff)
 
-        if filesOlderThanCutoff:
-            #excludeDir = os.path.join(dir_path, "exclude")
-            if not os.path.exists(exclude_output_path):
-                os.makedirs(exclude_output_path)
+            if filesOlderThanCutoff:
+                #excludeDir = os.path.join(dir_path, "exclude")
+                if not os.path.exists(exclude_output_path):
+                    os.makedirs(exclude_output_path)
 
-            for excludeFile in filesOlderThanCutoff:
-                srcFile = os.path.join(dir_path, excludeFile)
-                dstFile = os.path.join(exclude_output_path, excludeFile)
-                shutil.move(srcFile, dstFile)
-                print("Moved \"" + srcFile + "\" to exclude folder")
+                for excludeFile in filesOlderThanCutoff:
+                    srcFile = os.path.join(dir_path, excludeFile)
+                    dstFile = os.path.join(exclude_output_path, excludeFile)
+                    shutil.move(srcFile, dstFile)
+                    print("Moved \"" + srcFile + "\" to exclude folder")
 
     else:
         print ("ERROR: The provided directory to cleanDirectory() \"" + dir_path + "\" does not exist")
