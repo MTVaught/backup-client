@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 import sys
 import getopt
@@ -15,7 +16,7 @@ import configparser
     # Move into 'exclude' directory
 
 # Function definition
-def cleanDirectory ( dir_path, nDays ):
+def cleanDirectory ( dir_path, exclude_output_path, nDays ):
     print ("Searching " + dir_path + " for files older than " + str(nDays) + " days")
 
     # calculate what time (in seconds) to use as a cutoff for moving files
@@ -41,14 +42,14 @@ def cleanDirectory ( dir_path, nDays ):
         #print(filesOlderThanCutoff)
 
         if filesOlderThanCutoff:
-            excludeDir = os.path.join(dir_path, "exclude")
-            if not os.path.exists(excludeDir):
-                os.makedirs(excludeDir)
+            #excludeDir = os.path.join(dir_path, "exclude")
+            if not os.path.exists(exclude_output_path):
+                os.makedirs(exclude_output_path)
 
             for excludeFile in filesOlderThanCutoff:
-                srcFile = os.path.join(dir_path,excludeFile)
-                dstFile = os.path.join(excludeDir, excludeFile)
-                os.rename(srcFile, dstFile)
+                srcFile = os.path.join(dir_path, excludeFile)
+                dstFile = os.path.join(exclude_output_path, excludeFile)
+                shutil.move(srcFile, dstFile)
                 print("Moved \"" + srcFile + "\" to exclude folder")
 
     else:
@@ -57,17 +58,23 @@ def cleanDirectory ( dir_path, nDays ):
 
 # MAIN
 # argv[0] = path to backup folder
-# argv[1] = path to config file
+# argv[1] = path to (output) excludes folder
+# argv[2] = path to config file
 
-if len(sys.argv) != 3:
-    print ("ERROR: only two arguments are allowed")
+if len(sys.argv) != 4:
+    print ("ERROR: only three arguments are allowed")
     exit(-1)
 
 dir_path = sys.argv[1]
-config_path = sys.argv[2]
+exclude_path = sys.argv[2]
+config_path = sys.argv[3]
 
 if not os.path.exists(dir_path):
     print ("ERROR: directory path \"" + dir_path + "\" does not exist")
+    exit(-1)
+
+if not os.path.exists(exclude_path):
+    print ("ERROR: directory path \"" + exclude_path + "\" does not exist")
     exit(-1)
 
 if not os.path.isfile(config_path):
@@ -102,4 +109,4 @@ for file in onlyfiles:
 #    cleanDirectory
 #
 for dir in onlydirs:
-    cleanDirectory(os.path.join(dir_path, dir), nDaysCutoff)
+    cleanDirectory(os.path.join(dir_path, dir), os.path.join(exclude_path, dir), nDaysCutoff)
