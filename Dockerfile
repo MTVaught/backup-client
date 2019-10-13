@@ -27,5 +27,6 @@ RUN perl -c /root/staging/backup.pl
 RUN python -m py_compile /root/staging/cleanup-backup.py
 
 RUN mkdir -p /backup/in
+RUN mkdir -p /backup/in_subdir
 
 #CMD ["su", "-c", "bash", "-l", "user"];
