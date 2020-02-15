@@ -11,29 +11,81 @@ use Getopt::Long;
 
 ## Constants
 use constant {
-    TAR                     => "tar",
-    TAR_FLAGS               => "cWf",
-    TAR_FLAGS_COMPRESS       => "czWf",
+    TAR_CREATE              => "tar --create",
+    TAR_OUT_FILE            => "--file",
+    TAR_SNAPSHOT_FILE       => "--listed-incremental",
     TAR_EXTENSION           => "tar",
-    TAR_EXTENSION_COMPRESS   => "tar.gz",
+    SNAPSHOT_EXTENSION      => "snar",
 };
+
+my $quarterly_level_0_dir = "";
+my $monthly_level_0_dir = "";
+my $weekly_level_0_dir = "";
 
 my $in_dir;
 my $subdir_in_dir;
 my $out_dir;
+my $timeframe;
 my $dry_run = 0;
 
 GetOptions (
-    "indir=s" => \$in_dir,
-    "insubdir=s" => \$subdir_in_dir,
-    "outdir=s"  => \$out_dir,
-    "dryrun"    => \$dry_run
+    "indir=s"     => \$in_dir,
+    "insubdir=s"  => \$subdir_in_dir,
+    "outdir=s"    => \$out_dir,
+    "timeframe=s" => \$timeframe,
+    "dryrun"      => \$dry_run
 ) or die ("Error in command line arguments\n");
 
-unless( defined($in_dir) && defined($out_dir) && defined($subdir_in_dir))
+my $zero_idx_month = `date +%m` - 1;
+my $quarter = int($zero_idx_month / 3) + 1;
+
+$quarterly_level_0_dir = `date +%Y_Q`;
+chomp($quarterly_level_0_dir);
+$quarterly_level_0_dir .= $quarter;
+
+$monthly_level_0_dir = `date +%Y_%m`;
+chomp($monthly_level_0_dir);
+
+$weekly_level_0_dir = `date +%Y_W%U`;
+chomp($weekly_level_0_dir);
+
+unless( $quarterly_level_0_dir =~ /\d{4}_Q[1-4]{1}/)
 {
-    die "ERROR: Not all options are defined\n";
+    die "Unexpected pattern for quarterly dir: \"$quarterly_level_0_dir\"\n";
 }
+
+unless( $monthly_level_0_dir =~ /\d{4}_[0-1]\d/)
+{
+    die "Unexpected pattern for monthly dir: \"$monthly_level_0_dir\"\n";
+}
+
+unless( $weekly_level_0_dir =~ /\d{4}_W[0-5]\d/)
+{
+    die "Unexpected pattern for weekly dir: \"$weekly_level_0_dir\"\n";
+}
+
+unless( defined($in_dir))
+{
+    die "ERROR: indir not defined\n";
+}
+
+unless(defined($out_dir))
+{
+    die "ERROR: outdir not defined\n";
+}
+
+
+unless(defined($subdir_in_dir))
+{
+    die "ERROR: subdir not defined\n";
+}
+
+unless(defined($timeframe))
+{
+    die "ERROR: timeframe not defined\n";
+}
+
+
 
 unless ( IsDir($in_dir) )
 {
@@ -46,6 +98,26 @@ unless ( IsDir($subdir_in_dir) )
 unless ( IsDir($out_dir) )
 {
     die "ERROR: out directory \"$out_dir\" is not valid";
+}
+
+$timeframe = lc($timeframe);
+
+my $output_dated_subdir;
+if($timeframe eq "quarter")
+{
+    $output_dated_subdir = $quarterly_level_0_dir;
+}
+elsif($timeframe eq "month")
+{
+    $output_dated_subdir = $monthly_level_0_dir;
+}
+elsif($timeframe eq "week")
+{
+    $output_dated_subdir = $weekly_level_0_dir;
+}
+else
+{
+    die("ERROR: unsupported timeframe \"$timeframe\". Must be either \"quarter\", \"month\", or \"week\".");
 }
 
 my $success = 1;
@@ -153,7 +225,7 @@ if($success == 1 && $dry_run != 1)
         my $archive_in_file = $file;
         my $compression = 0;
         my $archive_path;
-        my $local_success = CreateArchive(\$archive_path, $archive_in_dir, $archive_in_file, $out_dir, $archive_name, $compression);
+        my $local_success = CreateArchive(\$archive_path, $archive_in_dir, $archive_in_file, $out_dir, $archive_name, $output_dated_subdir);
 
         if($local_success == 1)
         {
@@ -228,7 +300,7 @@ sub GetFilesInDirectory
 
 sub CreateArchive
 {
-    my ($archive_path, $in_dir, $in_file, $out_dir, $archive_name, $compression) = @_;
+    my ($archive_path, $in_dir, $in_file, $out_dir, $archive_name, $output_dated_subdir) = @_;
     my $success = 1;
 
     unless ( IsDir($in_dir))
@@ -250,7 +322,7 @@ sub CreateArchive
     my $dest_dir;
     if( $success == 1)
     {
-        $dest_dir = "$out_dir/$archive_name";
+        $dest_dir = "$out_dir/$archive_name/$output_dated_subdir";
         my $mkdir_cmd = "mkdir -p \"$dest_dir\"";
         system($mkdir_cmd);
 
@@ -267,39 +339,33 @@ sub CreateArchive
     {
         my $timestamp = strftime "%Y-%m-%d_%H-%M-GMT", gmtime time;
 
-        if($compression == 1)
-        {
-            $tar_cmd = TAR . ' ' . TAR_FLAGS_COMPRESS;
-            $tar_dest = "$dest_dir/$archive_name-$timestamp." . TAR_EXTENSION_COMPRESS;
-        }
-        else
-        {
-            $tar_cmd = TAR . ' ' . TAR_FLAGS;
-            $tar_dest = "$dest_dir/$archive_name-$timestamp." . TAR_EXTENSION;
-        }
-    }
+        $tar_dest = "$dest_dir/$archive_name-$output_dated_subdir-$timestamp.".TAR_EXTENSION;
+        my $tar_snapshot = "$dest_dir/$archive_name-$output_dated_subdir.".SNAPSHOT_EXTENSION;
+        $tar_cmd = TAR_CREATE.' '
+                    .TAR_OUT_FILE."=\"$tar_dest\" "
+                    .TAR_SNAPSHOT_FILE."=\"$tar_snapshot\"";
 
-    if($success == 1)
-    {
         if ( -e $tar_dest )
         {
             print "ERROR: destination archive \"$tar_dest\" already exists\n";
             $success = 0;
         }
+
     }
 
     if($success == 1)
     {
         my $run_cd_cmd = "cd \"$in_dir\"";
-        my $run_tar_cmd = "$tar_cmd \"$tar_dest\" \"$in_file\"";
+        my $run_tar_cmd = "$tar_cmd \"$in_file\"";
         
         my $run_cmd = "$run_cd_cmd && $run_tar_cmd";
         print $run_cmd . "\n";
 
         my $output = `$run_cmd`;
+        my $rc = $?;
         print "$output\n";
 
-        unless ($? == 0)
+        unless ($rc == 0)
         {
             $success = 0;
             print "ERROR: tar command failed:\n$output\n";

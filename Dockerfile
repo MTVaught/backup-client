@@ -1,4 +1,4 @@
-FROM mtvaught/cron-base:old-env
+FROM mtvaught/cron-base:user-env
 
 RUN apk update \
     && apk add \
@@ -28,5 +28,8 @@ RUN python -m py_compile /root/staging/cleanup-backup.py
 
 RUN mkdir -p /backup/in
 RUN mkdir -p /backup/in_subdir
+
+# Run Daily
+ENV APP_CRON="0 0 * * 0"
 
 #CMD ["su", "-c", "bash", "-l", "user"];

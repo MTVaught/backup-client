@@ -14,5 +14,8 @@ docker run --rm \
     --env APP_UID=`id -u` \
     --env APP_GID=`id -g` \
     --env APP_CRON='* * * * *' \
+    --env USER_ENV_TIMEFRAME='week' \
+    --env APP_RUN_ON_STARTUP='true' \
+    --env DEBUG='true' \
    backup-client &
 

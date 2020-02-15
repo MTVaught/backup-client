@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -d /backup/in ] && [ -d /backup/in_subdir ] && [ -d /backup/out ]; then
-    perl $HOME/backup.pl --indir=/backup/in --insubdir=/backup/in_subdir --outdir=/backup/out
+    perl $HOME/backup.pl --indir=/backup/in --insubdir=/backup/in_subdir --outdir=/backup/out --timeframe=$USER_ENV_TIMEFRAME
     if [ -d /backup/config ] && [ -d /backup/exclude ]; then
         python $HOME/cleanup-backup.py /backup/out /backup/exclude /backup/config/config.ini
     else
