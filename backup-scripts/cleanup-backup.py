@@ -25,9 +25,7 @@ def getFirstDayOfQuarter(year, quarter):
 # Parse the custom folder format for quarterly, monthly, weekly and return the
 # time of the dir
 def timeIncrementalDirectory ( dir_name ):
-    #firstDayOfPeriod = None
     lastDayOfPeriod = None
-    print ("parsing " + dir_name + "\n")
 
     if lastDayOfPeriod is None:
         # Quarterly
@@ -36,17 +34,12 @@ def timeIncrementalDirectory ( dir_name ):
         if match:
             year = int(match.group(1))
             quarter = int(match.group(2))
-            #firstDayOfPeriod = getFirstDayOfQuarter(year, quarter)
-
-            nextYear = 0
-            nextQuarter = 0
-            if quarter is 4:
-                nextYear = year + 1
-                nextQuarter = 1
-            else:
-                nextYear = year
-                nextQuarter = quarter + 1
-            lastDayOfPeriod = getFirstDayOfQuarter(nextYear, nextQuarter) - datetime.timedelta(days=1)
+            quarter += 1
+            if quarter > 4:
+                year += 1
+                quarter = 1
+           
+            lastDayOfPeriod = getFirstDayOfQuarter(year, quarter) - datetime.timedelta(days=1)
 
     if lastDayOfPeriod is None:
         # Monthly
@@ -71,8 +64,6 @@ def timeIncrementalDirectory ( dir_name ):
             lastDayOfPeriod = datetime.datetime.strptime(dir_name+"-0", "%Y_W%U-%w")
             lastDayOfPeriod += datetime.timedelta(days=6)
     
-    print("Compare: "+dir_name+" -> " + str(lastDayOfPeriod) + "\n")
-
     return lastDayOfPeriod
 
 # Function definition
@@ -88,7 +79,7 @@ def cleanDirectory ( dir_path, archive_output_path, timeDelta ):
             currentDate = datetime.datetime.now()
             dateCutoff = currentDate - timeDelta
 
-            print ("Searching " + dir_path + " for legacy tar files older than " + str(timeDelta) + " days")
+            print ("Searching " + dir_path + " for backups older than " + str(timeDelta) + "\n")
             print ("(Created before " + str(dateCutoff) + ")\n")
 
             filesInDir = os.listdir(dir_path)
@@ -96,21 +87,19 @@ def cleanDirectory ( dir_path, archive_output_path, timeDelta ):
             filesOlderThanCutoff = []
             for file in filesInDir:
                 file_full_path = os.path.join(dir_path, file)
-                print(file_full_path+"\n")
 
                 if os.path.isfile(file_full_path):
                     fileModDate = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path,file)))
                     if fileModDate < dateCutoff:
                         filesOlderThanCutoff.append(file)
                 elif os.path.isdir(file_full_path):
-                    print ("File is directory\n")
                     dirCreation = timeIncrementalDirectory(file)
                     if dirCreation is None:
-                        print "ERROR"
+                        print "ERROR: Unable to parse date of directory: \"" + file_full_path + "\"\n"
                     elif dirCreation < dateCutoff:
                         filesOlderThanCutoff.append(file)
                 else:
-                    print (str(file_full_path) + " is somehow neither a file or directory\n")
+                    print ("ERROR: " + str(file_full_path) + " is somehow neither a file or directory\n")
 
             print(filesOlderThanCutoff)
 
