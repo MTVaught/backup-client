@@ -30,6 +30,6 @@ RUN mkdir -p /backup/in
 RUN mkdir -p /backup/in_subdir
 
 # Run Daily
-ENV APP_CRON="0 0 * * 0"
+ENV APP_CRON="0 0 * * *"
 
 #CMD ["su", "-c", "bash", "-l", "user"];
